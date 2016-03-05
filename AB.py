@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import numpy as numpy
-from math import exp
+
 
 def AB(x1, y1, x2, y2, h):
-    return y2 + (1.5 * h * fxy(x2, y2) - 0.5 * h * fxy(x1, y1))  # adams bashforth
+    return y2 + (h*(3 * fxy(x2, y2) - 1*fxy(x1, y1))/2)  # adams bashforth
 
 def euler(x0, y0, h):
     return y0 + h * fxy(x0, y0)   # metodo de euler
@@ -13,6 +13,13 @@ def rungeKutta(x, y, h):
     m0 = h * fxy(x, y)
     m1 = h * fxy(x + h, y + m0)
     return y + (m0 + m1) / 2
+
+def rungeKutta4o(x, y, h):
+    m0 = h * fxy(x, y)
+    m1 = h * fxy(x + h/2, y + m0/2)
+    m2 = h * fxy(x + h/2, y + m1/2)
+    m3 = h * fxy(x + h, y + m2)
+    return y + ((m0 + 2*m1 + 2*m2 + m3) / 6)
 
 def PVI(y0, dominio, h):
     y = numpy.zeros(len(dominio))
@@ -24,27 +31,29 @@ def PVI(y0, dominio, h):
     return y
 
 def fxy(x, y):
-    return y
+    return (1/(1+x*x))-(2*y*y)
 
 def know(x):
-    return exp(x)
+    return x/(1+pow(x, 2))
 
-x = numpy.arange(0, 2.2, 0.2)
-y = PVI(1., x, 0.2)
-plt.plot(x, y, '-o', label='Passo 0.2')
+def PVIRK(y0, dominio, h):
+    y = numpy.zeros(len(dominio))
+    for i, xi in enumerate(dominio[0:-1], start = 0):
+        y[i+1] = rungeKutta4o(xi, y[i], h)
+    return y;
 
-x = numpy.arange(0, 2.4, 0.4)
-y = PVI(1, x, 0.4)
-plt.plot(x, y, '-o', label='Passo 0.4')
+passo = 0.1
+x = numpy.arange(0, 5.1, passo)
+y = PVI(0., x, passo)
+plt.plot(x, y, '-o', label='Passo ' + str(passo))
 
-x = numpy.arange(0, 2.5, 0.5)
-y = PVI(1, x, 0.5)
-plt.plot(x, y, '-o', label='Passo 0.5')
 
-x = numpy.arange(0, 2.1, 0.1)
-plt.plot(x, [know(i) for i in x], 'k--', label='Known')
+passo = 0.3
+x = numpy.arange(0, 5.1, passo)
+y = PVI(0., x, passo)
+plt.plot(x, y, '-o', label='Passo ' + str(passo))
 
 plt.xlabel('$x$'), plt.ylabel('$y$')
-plt.legend(loc=2)
+plt.legend(loc=1)
 
 plt.savefig("temp1.png")
